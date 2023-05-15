@@ -1,0 +1,126 @@
+!
+version 15.1
+no service timestamps log datetime msec
+no service timestamps debug datetime msec
+no service password-encryption
+!
+hostname VivaRouter
+!
+!
+!
+!
+!
+!
+!
+!
+ip cef
+no ipv6 cef
+!
+!
+!
+!
+license udi pid CISCO2911/K9 sn FTX15244P5E-
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+!
+spanning-tree mode pvst
+!
+!
+!
+!
+!
+!
+interface GigabitEthernet0/0
+ no ip address
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/0.10
+ description Company-VLAN
+ encapsulation dot1Q 10
+ ip address 192.168.10.1 255.255.255.0
+ ip helper-address 192.168.10.2
+ ip helper-address 192.168.10.10
+ ip nat inside
+!
+interface GigabitEthernet0/0.20
+ description Security-VLAN
+ encapsulation dot1Q 20
+ ip address 192.168.20.1 255.255.255.0
+ ip helper-address 192.168.10.2
+ ip helper-address 192.168.10.10
+ ip access-group ALLOW_SECURITY_TRAFFIC in
+ ip nat inside
+!
+interface GigabitEthernet0/0.30
+ description Public-VLAN
+ encapsulation dot1Q 30
+ ip address 192.168.30.1 255.255.255.0
+ ip helper-address 192.168.10.2
+ ip helper-address 192.168.10.10
+ ip nat inside
+!
+interface GigabitEthernet0/0.40
+ description Printer-VLAN
+ encapsulation dot1Q 40
+ ip address 192.168.40.1 255.255.255.0
+ ip helper-address 192.168.10.10
+ ip nat inside
+!
+interface GigabitEthernet0/1
+ description WAN
+ ip address dhcp
+ ip nat outside
+ duplex auto
+ speed auto
+!
+interface GigabitEthernet0/2
+ no ip address
+ duplex auto
+ speed auto
+!
+interface Vlan1
+ no ip address
+!
+router rip
+!
+ip nat inside source list NAT_ACL interface GigabitEthernet0/1 overload
+ip default-gateway 192.168.1.1
+ip classless
+!
+ip flow-export version 9
+!
+!
+ip access-list extended ALLOW_SECURITY_TRAFFIC
+ permit ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255
+ permit ip 192.168.20.0 0.0.0.255 192.168.10.0 0.0.0.255
+ deny ip any any
+ip access-list extended NAT_ACL
+ permit ip 192.168.10.0 0.0.0.255 any
+ permit ip 192.168.20.0 0.0.0.255 any
+ permit ip 192.168.30.0 0.0.0.255 any
+ permit ip 192.168.40.0 0.0.0.255 any
+!
+!
+!
+!
+!
+line con 0
+!
+line aux 0
+!
+line vty 0 4
+ login
+!
+!
+!
+end
+
