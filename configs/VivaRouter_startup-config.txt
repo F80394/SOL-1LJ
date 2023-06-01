@@ -47,32 +47,32 @@ interface GigabitEthernet0/0.10
  description Company-VLAN
  encapsulation dot1Q 10
  ip address 192.168.10.1 255.255.255.0
- ip helper-address 192.168.10.2
- ip helper-address 192.168.10.10
+ ip access-group ACL_VLAN10_INSIDE in
+ ip access-group ACL_VLAN10_OUTSIDE out
  ip nat inside
 !
 interface GigabitEthernet0/0.20
  description Security-VLAN
  encapsulation dot1Q 20
  ip address 192.168.20.1 255.255.255.0
- ip helper-address 192.168.10.2
- ip helper-address 192.168.10.10
- ip access-group ALLOW_SECURITY_TRAFFIC in
+ ip access-group ACL_VLAN20_INSIDE in
+ ip access-group ACL_VLAN20_OUTSIDE out
  ip nat inside
 !
 interface GigabitEthernet0/0.30
  description Public-VLAN
  encapsulation dot1Q 30
  ip address 192.168.30.1 255.255.255.0
- ip helper-address 192.168.10.2
- ip helper-address 192.168.10.10
+ ip access-group ACL_VLAN30_INSIDE in
+ ip access-group ACL_VLAN30_OUTSIDE out
  ip nat inside
 !
 interface GigabitEthernet0/0.40
  description Printer-VLAN
  encapsulation dot1Q 40
  ip address 192.168.40.1 255.255.255.0
- ip helper-address 192.168.10.10
+ ip access-group ACL_VLAN40_INSIDE in
+ ip access-group ACL_VLAN40_OUTSIDE out
  ip nat inside
 !
 interface GigabitEthernet0/1
@@ -83,14 +83,12 @@ interface GigabitEthernet0/1
  speed auto
 !
 interface GigabitEthernet0/2
- no ip address
+ ip address 192.168.2.1 255.255.255.0
  duplex auto
  speed auto
 !
 interface Vlan1
  no ip address
-!
-router rip
 !
 ip nat inside source list NAT_ACL interface GigabitEthernet0/1 overload
 ip default-gateway 192.168.1.1
@@ -99,15 +97,46 @@ ip classless
 ip flow-export version 9
 !
 !
-ip access-list extended ALLOW_SECURITY_TRAFFIC
- permit ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255
- permit ip 192.168.20.0 0.0.0.255 192.168.10.0 0.0.0.255
- deny ip any any
 ip access-list extended NAT_ACL
  permit ip 192.168.10.0 0.0.0.255 any
- permit ip 192.168.20.0 0.0.0.255 any
  permit ip 192.168.30.0 0.0.0.255 any
- permit ip 192.168.40.0 0.0.0.255 any
+ip access-list extended ACL_VLAN10_INSIDE
+ permit ip 192.168.10.0 0.0.0.255 192.168.10.0 0.0.0.255
+ permit ip 192.168.10.0 0.0.0.255 host 8.8.8.8
+ permit ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255
+ deny ip any any
+ip access-list extended ACL_VLAN10_OUTSIDE
+ permit ip 192.168.30.0 0.0.0.255 192.168.10.0 0.0.0.255
+ permit ip host 8.8.8.8 192.168.10.0 0.0.0.255
+ permit ip 192.168.20.0 0.0.0.255 192.168.10.0 0.0.0.255
+ deny ip any any
+ip access-list extended ACL_VLAN20_INSIDE
+ permit ip 192.168.20.0 0.0.0.255 192.168.20.0 0.0.0.255
+ permit ip 192.168.20.0 0.0.0.255 192.168.10.0 0.0.0.255
+ deny ip any any
+ip access-list extended ACL_VLAN20_OUTSIDE
+ permit ip 192.168.10.0 0.0.0.255 192.168.20.0 0.0.0.255
+ deny ip any any
+ip access-list extended ACL_VLAN30_INSIDE
+ permit ip 192.168.30.0 0.0.0.255 192.168.30.0 0.0.0.255
+ permit ip 192.168.30.0 0.0.0.255 host 8.8.8.8
+ permit ip 192.168.30.0 0.0.0.255 192.168.10.0 0.0.0.255
+ permit ip 192.168.30.0 0.0.0.255 192.168.40.0 0.0.0.255
+ deny ip any any
+ip access-list extended ACL_VLAN30_OUTSIDE
+ permit ip 192.168.10.0 0.0.0.255 192.168.30.0 0.0.0.255
+ permit ip host 8.8.8.8 192.168.30.0 0.0.0.255
+ permit ip 192.168.40.0 0.0.0.255 192.168.30.0 0.0.0.255
+ deny ip any any
+ip access-list extended ACL_VLAN40_INSIDE
+ permit ip 192.168.40.0 0.0.0.255 192.168.40.0 0.0.0.255
+ permit ip 192.168.40.0 0.0.0.255 192.168.30.0 0.0.0.255
+ permit ip 192.168.40.0 0.0.0.255 192.168.10.0 0.0.0.255
+ deny ip any any
+ip access-list extended ACL_VLAN40_OUTSIDE
+ permit ip 192.168.30.0 0.0.0.255 192.168.40.0 0.0.0.255
+ permit ip 192.168.10.0 0.0.0.255 192.168.40.0 0.0.0.255
+ deny ip any any
 !
 !
 !
